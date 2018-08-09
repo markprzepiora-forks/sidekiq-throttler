@@ -65,6 +65,10 @@ module Sidekiq
         def append(key, time)
           Sidekiq.redis do |conn|
             conn.lpush(namespace_key(key), time.to_i)
+
+            # Expire keys after 1 day - this prevents keys from filling up the
+            # Redis instance forever and ever.
+            conn.expire(namespace_key(key), 60 * 60 * 24)
           end
         end
 
